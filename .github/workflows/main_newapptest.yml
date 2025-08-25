@@ -1,19 +1,25 @@
-name: Deploy Static HTML to Azure App Service
+name: Deploy static site to Azure Web App
 
 on:
   push:
     branches:
-      - main   # Or your branch name
+      - main  # or your branch name
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: mlsaproject   # 🔹 Replace with your App Service name
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
-          package: .
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Upload files to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: mlsaproject   # your Web App name
+        package: .              # deploy everything in repo root (index.html, css, js)
