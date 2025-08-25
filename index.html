@@ -1,52 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>News Dashboard</title>
+  <title>News Dashboard</title>
 </head>
 <body>
-    <h1>Latest News</h1>
-    <select id="category">
-        <option value="">All</option>
-        <option value="business">Business</option>
-        <option value="technology">Technology</option>
-        <option value="sports">Sports</option>
-    </select>
-    <button onclick="loadNews()">Refresh</button>
-    <ul id="newsList"></ul>
+  <h1>Latest News</h1>
+  <button onclick="loadNews()">Refresh</button>
+  <ul id="newsList"></ul>
 
-    <script>
-        async function loadNews() {
-            try {
-                // URL of your blob
-                const blobUrl = "https://mlsanewsdashboard.blob.core.windows.net/news-data/latest-headlines.json";
-                const res = await fetch(blobUrl);
-                const data = await res.json();
+  <script>
+    async function loadNews() {
+      try {
+        // URL of the blob where Function App writes news
+        const containerUrl = "https://mlsanewsdashboard.blob.core.windows.net/news-data/latest-headlines.json";
+        
+        const res = await fetch(containerUrl);
+        const data = await res.json();
 
-                const categoryFilter = document.getElementById("category").value;
+        const newsList = document.getElementById("newsList");
+        newsList.innerHTML = "";
 
-                // If category does not exist in JSON, ignore filtering
-                const filteredArticles = categoryFilter
-                    ? data.articles.filter(a => a.category && a.category === categoryFilter)
-                    : data.articles;
+        data.articles.forEach(article => {
+          const li = document.createElement("li");
+          li.innerHTML = `<a href="${article.url}" target="_blank">${article.title}</a> (${article.source.name})`;
+          newsList.appendChild(li);
+        });
+      } catch (err) {
+        console.error("Failed to load news:", err);
+      }
+    }
 
-                const newsList = document.getElementById("newsList");
-                newsList.innerHTML = "";
-
-                filteredArticles.forEach(article => {
-                    const li = document.createElement("li");
-                    li.innerHTML = `<a href="${article.url}" target="_blank">${article.title}</a> (${article.source.name})`;
-                    newsList.appendChild(li);
-                });
-
-            } catch (err) {
-                console.error("Error loading news:", err);
-                const newsList = document.getElementById("newsList");
-                newsList.innerHTML = "<li>Failed to load news. Please try again.</li>";
-            }
-        }
-
-        // Load news automatically on page load
-        loadNews();
-    </script>
+    loadNews(); // load when page opens
+  </script>
 </body>
 </html>
